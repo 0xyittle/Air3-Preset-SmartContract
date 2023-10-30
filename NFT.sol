@@ -294,28 +294,6 @@ interface IERC721A {
      */
     event ConsecutiveTransfer(uint256 indexed fromTokenId, uint256 toTokenId, address indexed from, address indexed to);
 }
-// File: contracts/IERC721ABurnable.sol
-
-
-// ERC721A Contracts v4.2.3
-// Creator: Chiru Labs
-
-pragma solidity ^0.8.4;
-
-
-/**
- * @dev Interface of ERC721ABurnable.
- */
-interface IERC721ABurnable is IERC721A {
-    /**
-     * @dev Burns `tokenId`. See {ERC721A-_burn}.
-     *
-     * Requirements:
-     *
-     * - The caller must own `tokenId` or be an approved operator.
-     */
-    function burn(uint256 tokenId) external;
-}
 // File: contracts/IERC721AQueryable.sol
 
 
@@ -1520,33 +1498,6 @@ contract ERC721A is IERC721A {
         }
     }
 }
-// File: contracts/ERC721ABurnable.sol
-
-
-// ERC721A Contracts v4.2.3
-// Creator: Chiru Labs
-
-pragma solidity ^0.8.4;
-
-
-
-/**
- * @title ERC721ABurnable.
- *
- * @dev ERC721A token that can be irreversibly burned (destroyed).
- */
-abstract contract ERC721ABurnable is ERC721A, IERC721ABurnable {
-    /**
-     * @dev Burns `tokenId`. See {ERC721A-_burn}.
-     *
-     * Requirements:
-     *
-     * - The caller must own `tokenId` or be an approved operator.
-     */
-    function burn(uint256 tokenId) public virtual override {
-        _burn(tokenId, true);
-    }
-}
 // File: contracts/ERC721AQueryable.sol
 
 
@@ -1909,12 +1860,9 @@ pragma solidity ^0.8.0;
 
 
 
-
-contract NFT is Ownable, ERC721A, ReentrancyGuard, ERC721AQueryable, ERC721ABurnable {
+contract NFT is Ownable, ERC721A, ReentrancyGuard, ERC721AQueryable {
 
     event Received(address, uint);
-
-    address public deployerAddress ;
 
     uint256 public globalPrice = 0 ether ;
 
@@ -1928,8 +1876,6 @@ contract NFT is Ownable, ERC721A, ReentrancyGuard, ERC721AQueryable, ERC721ABurn
 
 
     constructor()  ERC721A("Smart Contract Prototype by Air3", "AIR3P") {
-
-        deployerAddress = msg.sender;
         
     }
 
@@ -1938,37 +1884,16 @@ contract NFT is Ownable, ERC721A, ReentrancyGuard, ERC721AQueryable, ERC721ABurn
     _;
     }
 
-//------------------ BaseURI 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
-    }
-
-    function setBaseURI (string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
-    }
-
-//--------------------- END BaseURI
 //--------------------------------------- Mint //////////////
-//-------------------- DevMint
-    function devMint(address _to ,uint256 _mintAmount) external onlyOwner {
-
-        _safeMint( _to,_mintAmount);
-    }
-//-------------------- END DevMint
 //-------------------- User Mint
 
     function mint(uint256 _mintAmount) external payable {
 
         require(globalPrice * _mintAmount <= msg.value, "Ether value sent is not correct"); // จ่ายเท่าที่ต้องจ่าย
 
-        _safeMint(msg.sender, _mintAmount); // มิ้นเท่าจำนวนที่จะมิ้น
+        _safeMint(msg.sender, _mintAmount);
         _addressDetail[msg.sender].WalletMinted += _mintAmount ;
     
-    }
-
-
-    function numberMinted(address owner) public view returns (uint256) { // check number Minted of that address จำนวนที่มิ้นไปแล้ว ใน address นั้น
-        return _numberMinted(owner);
     }
 
 //-------------------- END User Mint
